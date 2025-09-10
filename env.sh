@@ -400,7 +400,11 @@ setup_root_config() {
 
     # Copy z.sh to root
     sudo mkdir -p /root/.scripts/z
-    sudo cp ~/.scripts/z/z.sh /root/.scripts/z/
+    if [[ -f ~/.scripts/z/z.sh ]]; then
+        sudo cp ~/.scripts/z/z.sh /root/.scripts/z/
+    else
+        warn "z.sh not found in ~/.scripts/z/, skipping copy to root"
+    fi
 
     # Copy bash config structure to root
     sudo mkdir -p /root/.config/bash

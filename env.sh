@@ -278,7 +278,7 @@ EOF
 alias ll='ls -la'
 alias la='ls -A'
 alias l='ls -CF'
-alias ls='ls --color=auto'
+alias ls='ls -h --color=auto --group-directories-first'
 
 # grep with color
 alias grep='grep --color=auto'

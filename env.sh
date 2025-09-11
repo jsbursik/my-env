@@ -481,6 +481,19 @@ EOF
     log "Console colors will be applied after reboot"
 }
 
+setup_tty_font() {
+    log "Configuring console font..."
+    sudo tee /etc/default/console-setup >dev/null << 'EOF'
+ACTIVE_CONSOLES="/dev/tty[1-6]"
+CHARMAP="UTF-8"
+CODESET="Lat15"
+FONTFACE="Terminus"
+FONTSIZE="8x16"
+EOF
+    # Apply the font settings immediately
+    sudo setupcon
+}
+
 # Main execution
 main() {
     echo -e "${BLUE}=== Environment Setup Script ===${NC}"
@@ -503,8 +516,9 @@ main() {
     # Setup bash configuration FIRST (without NVM)
     setup_bash_config
 
-    # Setup TTY colors if not SSH'd
+    # Setup TTY colors and font for base TTY
     setup_tty_colors
+    setup_tty_font
 
     # Optional: Install Docker
     read -p "Install Docker? [y/N]: " install_docker_choice

@@ -483,7 +483,7 @@ EOF
 
 setup_tty_font() {
     log "Configuring console font..."
-    sudo tee /etc/default/console-setup >dev/null << 'EOF'
+    sudo tee /etc/default/console-setup >/dev/null << 'EOF'
 ACTIVE_CONSOLES="/dev/tty[1-6]"
 CHARMAP="UTF-8"
 CODESET="Lat15"

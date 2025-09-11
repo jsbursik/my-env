@@ -166,6 +166,16 @@ install_nvm() {
     # Download and install NVM
     curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/$LATEST_NVM_VERSION/install.sh" | bash
 
+    # ADD NVM LINES TO BASHRC AFTER INSTALLATION
+    log "Adding NVM configuration to bashrc..."
+    cat >> ~/.config/bash/bashrc << 'EOF'
+
+# NVM for Node.js version management
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+EOF
+
     # Source NVM immediately for this session
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
@@ -224,7 +234,7 @@ if [[ -f "$XDG_CONFIG_HOME/bash/bashrc" ]]; then
 fi
 EOF
 
-    # Create the main bash config file
+    # Create the main bash config file WITHOUT NVM LINES
     cat > ~/.config/bash/bashrc << 'EOF'
 # Main bash configuration
 # This file is sourced by ~/.bashrc
@@ -263,11 +273,6 @@ esac
 if [[ -f ~/.scripts/z/z.sh ]]; then
     source ~/.scripts/z/z.sh
 fi
-
-# NVM for Node.js version management
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 EOF
 
     # Create aliases file
@@ -459,20 +464,20 @@ main() {
     # Install z.sh
     install_z
 
+    # Setup bash configuration FIRST (without NVM)
+    setup_bash_config
+
     # Optional: Install Docker
     read -p "Install Docker? [y/N]: " install_docker_choice
     if [[ "$install_docker_choice" =~ ^[Yy]$ ]]; then
         install_docker "$DISTRO"
     fi
 
-    # Optional: Install NVM
+    # Optional: Install NVM (this will append NVM lines to bashrc)
     read -p "Install NVM (Node Version Manager)? [y/N]: " install_nvm_choice
     if [[ "$install_nvm_choice" =~ ^[Yy]$ ]]; then
         install_nvm
     fi
-
-    # Setup bash configuration
-    setup_bash_config
 
     # Setup root configuration
     read -p "Setup root configuration as well? [y/N]: " setup_root

@@ -375,7 +375,9 @@ EOF
 
 # Color-aware prompt using custom color scheme
 if [[ "$TERM" == "linux" ]]; then
-    # TTY console - use our custom colors
+    # TTY console - restore custom color palette first
+    printf '\e]P01c2023\e]P1c7ae95\e]P295c7ae\e]P3aec795\e]P4ae95c7\e]P5c795ae\e]P695aec7\e]P7c7ccd1\e]P8747c84\e]P9c7ae95\e]PAaec795\e]PBae95c7\e]PCc795ae\e]PD95aec7\e]PEf3f4f5\e]PFf3f4f5'
+    
     if [[ $EUID -eq 0 ]]; then
         # Root prompt - use red (color1: warm red-brown)
         PS1='\[\033[01;31m\]╭─[\[\033[01;33m\]\u\[\033[01;31m\]@\[\033[01;33m\]\h\[\033[01;31m\]:\[\033[01;36m\]\w\[\033[01;31m\]]\n╰─\[\033[01;31m\]>\[\033[00m\] '
@@ -469,8 +471,9 @@ setup_tty_colors() {
     # Configure console colors via kernel parameters
     sudo tee /etc/default/grub.d/99-console-colors.cfg >/dev/null << 'EOF'
 # Custom color scheme for TTY console
-# Based on provided Xresources configuration
+# Based on XResources configuration
 # Format: vt.default_red=c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15
+# Colors: black, red, green, yellow, blue, magenta, cyan, white, bright_black, bright_red, bright_green, bright_yellow, bright_blue, bright_magenta, bright_cyan, bright_white
 
 GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT vt.default_red=28,199,149,174,174,199,149,199,116,199,149,174,174,199,149,243"
 GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT vt.default_grn=32,174,199,199,149,149,174,204,124,174,199,199,149,149,174,244"

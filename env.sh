@@ -371,17 +371,27 @@ EOF
     cat > ~/.config/bash/prompt << 'EOF'
 # Bash prompt configuration
 
-# Starship prompt (preferred)
-if command -v starship >/dev/null 2>&1; then
-    eval "$(starship init bash)"
-else
-    # Fallback colorful prompt if Starship isn't available
+# Color-aware prompt using custom color scheme
+if [[ "$TERM" == "linux" ]]; then
+    # TTY console - use our custom colors
     if [[ $EUID -eq 0 ]]; then
-        # Root prompt (red)
-        PS1='\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\# '
+        # Root prompt - use red (color1: warm red-brown)
+        PS1='\[\033[01;31m\]╭─[\[\033[01;33m\]\u\[\033[01;31m\]@\[\033[01;33m\]\h\[\033[01;31m\]:\[\033[01;36m\]\w\[\033[01;31m\]]\n╰─\[\033[01;31m\]❯\[\033[00m\] '
     else
-        # User prompt (green)
-        PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+        # User prompt - use green/cyan (colors 2&6: soft green/blue)  
+        PS1='\[\033[01;36m\]╭─[\[\033[01;32m\]\u\[\033[01;36m\]@\[\033[01;32m\]\h\[\033[01;36m\]:\[\033[01;33m\]\w\[\033[01;36m\]]\n╰─\[\033[01;32m\]❯\[\033[00m\] '
+    fi
+else
+    # Terminal emulator - use Starship if available
+    if command -v starship >/dev/null 2>&1; then
+        eval "$(starship init bash)"
+    else
+        # Fallback prompt for terminal emulators
+        if [[ $EUID -eq 0 ]]; then
+            PS1='\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\# '
+        else
+            PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+        fi
     fi
 fi
 EOF
@@ -445,6 +455,32 @@ alias chgrp='chgrp --preserve-root'
 EOF
 }
 
+setup_tty_colors() {
+    log "Setting up custom TTY color scheme..."
+    
+    # Extract RGB values from hex colors
+    # Original scheme:
+    # Background: #1c2023 (28, 32, 35)
+    # Foreground: #c7ccd1 (199, 204, 209)
+    # Colors 0-15 from your Xresources
+    
+    # Configure console colors via kernel parameters
+    sudo tee /etc/default/grub.d/99-console-colors.cfg >/dev/null << 'EOF'
+# Custom color scheme for TTY console
+# Based on provided Xresources configuration
+# Format: vt.default_red=c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15
+
+GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT vt.default_red=28,199,149,174,174,199,149,199,116,199,149,174,174,199,149,243"
+GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT vt.default_grn=32,174,199,199,149,149,174,204,124,174,199,199,149,149,174,244"
+GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT vt.default_blu=35,149,174,149,199,174,199,209,132,149,174,149,199,174,199,245"
+EOF
+
+    # Update GRUB configuration
+    sudo update-grub
+    
+    log "Console colors will be applied after reboot"
+}
+
 # Main execution
 main() {
     echo -e "${BLUE}=== Environment Setup Script ===${NC}"
@@ -466,6 +502,9 @@ main() {
 
     # Setup bash configuration FIRST (without NVM)
     setup_bash_config
+
+    # Setup TTY colors if not SSH'd
+    setup_tty_colors
 
     # Optional: Install Docker
     read -p "Install Docker? [y/N]: " install_docker_choice

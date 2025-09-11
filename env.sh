@@ -368,13 +368,7 @@ EOF
 
 # Starship prompt (preferred)
 if command -v starship >/dev/null 2>&1; then
-    starship_init=$(starship init bash 2>/dev/null)
-    if [[ $? -eq 0 && -n "$starship_init" ]]; then
-        eval "$starship_init"
-    else
-        # Starship failed, use fallback
-        echo "Warning: Starship initialization failed, using fallback prompt" >&2
-    fi
+    eval "$(starship init bash)"
 else
     # Fallback colorful prompt if Starship isn't available
     if [[ $EUID -eq 0 ]]; then

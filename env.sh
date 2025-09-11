@@ -178,16 +178,18 @@ EOF
 
     # Source NVM immediately for this session
     export NVM_DIR="$HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"
 
     log "NVM installed. Installing latest LTS Node.js..."
     
     # Install latest LTS Node.js
     if command -v nvm >/dev/null 2>&1; then
+        set +u
         nvm install --lts
         nvm use --lts
         nvm alias default lts/*
+        set -u
     fi
 }
 

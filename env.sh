@@ -143,6 +143,38 @@ install_docker() {
     log "Docker installed. You may need to log out and back in for group changes to take effect."
 }
 
+setup_dockge_dozzle() {
+    log "Setting up Dockge/Dozzle Stack..."
+
+    sudo mkdir -p /opt/docker /opt/stacks/dockge
+    
+    sudo tee /opt/stacks/dockge/compose.yaml >/dev/null << 'EOF'
+services:
+  dockge:
+    container_name: dockge
+    image: louislam/dockge:1
+    restart: always
+    ports:
+      - 5001:5001
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/stacks/dockge/data:/app/data
+      - /opt/stacks:/opt/stacks
+    environment:
+      - DOCKGE_STACKS_DIR=/opt/stacks
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:latest
+    restart: always
+    ports:
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+EOF
+
+    sudo docker compose up -d /opt/stacks/dockge/compose.yaml
+}
+
 # Install NVM
 install_nvm() {
     log "Installing NVM..."
@@ -529,6 +561,11 @@ main() {
     read -p "Install Docker? [y/N]: " install_docker_choice
     if [[ "$install_docker_choice" =~ ^[Yy]$ ]]; then
         install_docker "$DISTRO"
+
+        read -p "Start a Dockge/Dozzle stack? [y/N]: " dockge_dozzle_choice
+        if [[ "$dockge_dozzle_choice" =~ ^[Yy]$ ]]; then
+            setup_dockge_dozzle
+        fi
     fi
 
     # Optional: Install NVM (this will append NVM lines to bashrc)

@@ -172,7 +172,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 EOF
 
-    sudo docker compose up -d /opt/stacks/dockge/compose.yaml
+    sudo docker compose -f /opt/stacks/dockge/compose.yaml up -d
 }
 
 # Install NVM

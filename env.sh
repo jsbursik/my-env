@@ -494,14 +494,23 @@ EOF
 setup_tty_colors() {
     log "Setting up custom TTY color scheme..."
     
-    local color_params="vt.default_red=28,199,149,174,174,199,149,199,116,199,149,174,174,199,149,243 vt.default_grn=32,174,199,199,149,149,174,204,124,174,199,199,149,149,174,244 vt.default_blu=35,149,174,149,199,174,199,209,132,149,174,149,199,174,199,245"
+    local red_values="28,199,149,174,174,199,149,199,116,199,149,174,174,199,149,243"
+    local grn_values="32,174,199,199,149,149,174,204,124,174,199,199,149,149,174,244"
+    local blu_values="35,149,174,149,199,174,199,209,132,149,174,149,199,174,199,245"
+
+    local color_params="vt.default_red=$red_values vt.default_grn=$grn_values vt.default_blu=$blu_values"
 
     sudo tee /etc/default/grub.d/99-console-colors.cfg >/dev/null << 'EOF'
-GRUB_CMDLINE_LINUX_DEFAULT="${color_params}"
+GRUB_CMDLINE_LINUX_DEFAULT="$color_params"
+EOF
+
+    sudo tee /etc/modprobe.d/vt-colors.conf >/dev/null << EOF
+options vt default_red=$red_values default_grn=$grn_values default_blu=$blu_values
 EOF
 
     # Update GRUB configuration
     sudo update-grub
+    sudo update-initramfs -u -k all
     
     log "Console colors will be applied after reboot"
 }

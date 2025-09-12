@@ -494,22 +494,10 @@ EOF
 setup_tty_colors() {
     log "Setting up custom TTY color scheme..."
     
-    # Extract RGB values from hex colors
-    # Original scheme:
-    # Background: #1c2023 (28, 32, 35)
-    # Foreground: #c7ccd1 (199, 204, 209)
-    # Colors 0-15 from your Xresources
-    
-    # Configure console colors via kernel parameters
-    sudo tee /etc/default/grub.d/99-console-colors.cfg >/dev/null << 'EOF'
-# Custom color scheme for TTY console
-# Based on XResources configuration
-# Format: vt.default_red=c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,c14,c15
-# Colors: black, red, green, yellow, blue, magenta, cyan, white, bright_black, bright_red, bright_green, bright_yellow, bright_blue, bright_magenta, bright_cyan, bright_white
+    local color_params="vt.default_red=28,199,149,174,174,199,149,199,116,199,149,174,174,199,149,243 vt.default_grn=32,174,199,199,149,149,174,204,124,174,199,199,149,149,174,244 vt.default_blu=35,149,174,149,199,174,199,209,132,149,174,149,199,174,199,245"
 
-GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT vt.default_red=28,199,149,174,174,199,149,199,116,199,149,174,174,199,149,243"
-GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT vt.default_grn=32,174,199,199,149,149,174,204,124,174,199,199,149,149,174,244"
-GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT vt.default_blu=35,149,174,149,199,174,199,209,132,149,174,149,199,174,199,245"
+    sudo tee /etc/default/grub.d/99-console-colors.cfg >/dev/null << 'EOF'
+GRUB_CMDLINE_LINUX_DEFAULT="${color_params}"
 EOF
 
     # Update GRUB configuration

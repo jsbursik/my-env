@@ -36,7 +36,7 @@ detect_distro() {
 # Install packages based on distro
 install_packages() {
     local distro="$1"
-    local packages="curl wget git unzip"
+    local packages="curl wget git unzip terminus-font"
 
     log "Installing base packages for $distro..."
 
@@ -500,32 +500,46 @@ setup_tty_colors() {
 
     local color_params="vt.default_red=$red_values vt.default_grn=$grn_values vt.default_blu=$blu_values"
 
-    sudo tee /etc/default/grub.d/99-console-colors.cfg >/dev/null << 'EOF'
+    sudo tee /etc/default/grub.d/99-console-colors.cfg >/dev/null << EOF
 GRUB_CMDLINE_LINUX_DEFAULT="$color_params"
-EOF
-
-    sudo tee /etc/modprobe.d/vt-colors.conf >/dev/null << EOF
-options vt default_red=$red_values default_grn=$grn_values default_blu=$blu_values
 EOF
 
     # Update GRUB configuration
     sudo update-grub
-    sudo update-initramfs -u -k all
+
+    # Check if console-setup is installed, edit vt colors if true
+    if command -v setupcon >/dev/null 2>&1; then
+        log "console-setup found, overwriting default colors..."
+
+        sudo tee /etc/console-setup/vtrgb /etc/console-setup/vtrgb.vga >/dev/null << EOF
+$red_values
+$grn_values
+$blu_values
+EOF
+    fi
     
     log "Console colors will be applied after reboot"
 }
 
 setup_tty_font() {
     log "Configuring console font..."
-    sudo tee /etc/default/console-setup >/dev/null << 'EOF'
+
+    if command -v setfont >/dev/null 2>&1; then
+        log "Detected kbd setfont..."
+        sudo setfont ter-v16b
+    elif command -v setupcon >/dev/null 2>&1; then
+        sudo tee /etc/default/console-setup >/dev/null << 'EOF'
 ACTIVE_CONSOLES="/dev/tty[1-6]"
 CHARMAP="UTF-8"
 CODESET="Lat15"
 FONTFACE="Terminus"
 FONTSIZE="8x16"
 EOF
-    # Apply the font settings immediately
-    sudo setupcon
+        # Apply the font settings immediately
+        sudo setupcon
+    else
+        warn "No console font utilities found"
+    fi
 }
 
 # Main execution
@@ -557,7 +571,7 @@ main() {
     # Optional: Install Docker
     read -p "Install Docker? [y/N]: " install_docker_choice
     if [[ "$install_docker_choice" =~ ^[Yy]$ ]]; then
-        install_docker "$DISTRO"
+        install_docker "$DISTRO" 
 
         read -p "Start a Dockge/Dozzle stack? [y/N]: " dockge_dozzle_choice
         if [[ "$dockge_dozzle_choice" =~ ^[Yy]$ ]]; then

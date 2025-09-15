@@ -524,10 +524,7 @@ EOF
 setup_tty_font() {
     log "Configuring console font..."
 
-    if command -v setfont >/dev/null 2>&1; then
-        log "Detected kbd setfont..."
-        sudo setfont ter-v16b
-    elif command -v setupcon >/dev/null 2>&1; then
+    if command -v setupcon >/dev/null 2>&1; then
         sudo tee /etc/default/console-setup >/dev/null << 'EOF'
 ACTIVE_CONSOLES="/dev/tty[1-6]"
 CHARMAP="UTF-8"
@@ -537,6 +534,9 @@ FONTSIZE="8x16"
 EOF
         # Apply the font settings immediately
         sudo setupcon
+    elif command -v setfont >/dev/null 2>&1; then
+        log "Detected kbd setfont..."
+        sudo setfont ter-v16b
     else
         warn "No console font utilities found"
     fi

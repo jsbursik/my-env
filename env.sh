@@ -36,13 +36,13 @@ detect_distro() {
 # Install packages based on distro
 install_packages() {
     local distro="$1"
-    local packages="curl wget git unzip terminus-font"
+    local packages="curl wget git unzip"
 
     log "Installing base packages for $distro..."
 
     case "$distro" in
         "Arch")
-            sudo pacman -Sy --noconfirm $packages
+            sudo pacman -Sy --noconfirm terminus-font $packages
             ;;
         "Ubuntu")
             sudo apt update
